@@ -11,7 +11,7 @@ namespace ElsaServer.SchedulingEngine.Workflows
         protected override void Build(IWorkflowBuilder builder)
         {
             builder.Name = "Scheduling RPP Pipeline";
-            var timerTrigger = new Elsa.Scheduling.Activities.Timer(TimeSpan.FromSeconds(30))
+            var timerTrigger = new Elsa.Scheduling.Activities.Timer(TimeSpan.FromHours(1))
             {
                 CanStartWorkflow = true
             };
