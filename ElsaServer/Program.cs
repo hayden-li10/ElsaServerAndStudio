@@ -7,6 +7,7 @@ using Elsa.Persistence.MongoDb.Extensions;
 using Elsa.Persistence.MongoDb.Modules.Management;
 using Elsa.Persistence.MongoDb.Modules.Runtime;
 using Elsa.Workflows;
+using Elsa.Workflows.Runtime.Distributed.Extensions;
 using ElsaServer.SchedulingEngine.Workflows;
 using Microsoft.AspNetCore.Mvc;
 using SchedulingEngine.BusinessEngine.Modules;
@@ -16,6 +17,7 @@ builder.WebHost.UseStaticWebAssets();
 
 var services = builder.Services;
 var configuration = builder.Configuration;
+var connectionString = "Data Source=(localdb)\\MSSQLLocalDB;Database=ElsaQuartzLocal;Integrated Security=True;MultipleActiveResultSets=True;Encrypt=False;TrustServerCertificate=True;";
 var mongoConnectionString = builder.Configuration.GetConnectionString("MongoDb")
     ?? throw new InvalidOperationException("Connection string 'MongoDb' not found.");
 
@@ -27,10 +29,12 @@ services
             identity.UseAdminUserProvider();
         })
         .UseDefaultAuthentication()
+        //.UseWorkflowRuntime(runtime => runtime.UseDistributedRuntime()) // Enable distributed runtime
+        //.UseScheduling(scheduling => scheduling.UseQuartzScheduler()) // Comment out to Disable Quartz scheduling
+        //.UseQuartz(quartz => quartz.UseSqlServer(connectionString)) // Comment out to Disable Quartz scheduling
         .UseMongoDb(mongoConnectionString)
         .UseWorkflowManagement(management => management.UseMongoDb())// Configure workflow management (definitions, instances)
         .UseWorkflowRuntime(runtime => runtime.UseMongoDb())// Configure workflow runtime (bookmarks, inbox, execution logs)
-        .UseScheduling()
         .UseJavaScript()
         .UseLiquid()
         .UseCSharp()
@@ -39,7 +43,6 @@ services
         .AddActivitiesFrom<Program>()
         .AddWorkflowsFrom<Program>()
     );
-
 services.AddCors(cors => cors.AddDefaultPolicy(policy => policy.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin().WithExposedHeaders("*")));
 services.AddRazorPages(options => options.Conventions.ConfigureFilter(new IgnoreAntiforgeryTokenAttribute()));
 
